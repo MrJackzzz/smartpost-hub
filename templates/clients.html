@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+{% block heading %}Clientes{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newClientModal"><i class="bi bi-plus-lg"></i> Nuevo cliente</button>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Cliente</th><th>Subdominio</th><th>Plan</th><th>Estado</th><th>Heartbeat</th><th>Creado</th><th></th></tr></thead>
+      <tbody>
+        {% for c in clients %}
+        <tr>
+          <td><a href="{{ url_for('client_detail', id=c.id) }}">{{ c.name }}</a></td>
+          <td><code>{{ c.subdomain }}</code></td>
+          <td>{{ c.plan.name if c.plan else '—' }}</td>
+          <td>
+            <span class="badge status-{{ c.status }}">{{ c.status }}</span>
+          </td>
+          <td><small class="text-muted">{{ c.last_heartbeat.strftime('%d/%m %H:%M') if c.last_heartbeat else '—' }}</small></td>
+          <td><small class="text-muted">{{ c.created_at.strftime('%d/%m/%Y') }}</small></td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary" onclick="editClient({{ c.id }})"><i class="bi bi-pencil"></i></button>
+            <form method="post" action="{{ url_for('client_delete', id=c.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar cliente?')">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- New Client Modal -->
+<div class="modal fade" id="newClientModal"><div class="modal-dialog"><div class="modal-content"><form method="post" action="{{ url_for('client_new') }}">
+  <div class="modal-header"><h5 class="modal-title">Nuevo cliente</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div class="mb-3"><label class="form-label">Nombre</label><input type="text" name="name" class="form-control" required></div>
+    <div class="mb-3"><label class="form-label">Subdominio</label><input type="text" name="subdomain" class="form-control" required placeholder="ej: micliente"></div>
+    <div class="mb-3"><label class="form-label">Plan</label><select name="plan_id" class="form-select">{% for p in plans %}<option value="{{ p.id }}">{{ p.name }} (${{ p.price }})</option>{% endfor %}</select></div>
+    <div class="mb-3"><label class="form-label">Máx. usuarios</label><input type="number" name="max_users" class="form-control" value="5"></div>
+    <div class="mb-3"><label class="form-label">Notas</label><textarea name="notes" class="form-control" rows="2"></textarea></div>
+  </div>
+  <div class="modal-footer"><button type="submit" class="btn btn-primary">Crear</button></div>
+</form></div></div></div>
+{% endblock %}

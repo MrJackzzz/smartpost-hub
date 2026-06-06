@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Planes{% endblock %}
+{% block heading %}Planes{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newPlanModal"><i class="bi bi-plus-lg"></i> Nuevo plan</button>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Nombre</th><th>Precio</th><th>Máx usuarios</th><th>Máx productos</th><th>Activo</th><th>Orden</th><th></th></tr></thead>
+      <tbody>
+        {% for p in plans %}
+        <tr>
+          <td class="fw-bold">{{ p.name }}</td>
+          <td>${{ "%.0f"|format(p.price) }}/mes</td>
+          <td>{{ p.max_users or '∞' }}</td>
+          <td>{{ p.max_products or '∞' }}</td>
+          <td>{% if p.is_active %}<span class="badge bg-success">Sí</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+          <td>{{ p.sort_order }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary" onclick="editPlan({{ p.id }})"><i class="bi bi-pencil"></i></button>
+            <form method="post" action="{{ url_for('plan_delete', id=p.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar plan?')">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- New Plan Modal -->
+<div class="modal fade" id="newPlanModal"><div class="modal-dialog"><div class="modal-content"><form method="post" action="{{ url_for('plan_new') }}">
+  <div class="modal-header"><h5 class="modal-title">Nuevo plan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" name="name" class="form-control" required></div>
+      <div class="col-md-6"><label class="form-label">Precio ($)</label><input type="number" step="0.01" name="price" class="form-control" value="0"></div>
+      <div class="col-md-6"><label class="form-label">Máx. usuarios</label><input type="number" name="max_users" class="form-control" value="5"></div>
+      <div class="col-md-6"><label class="form-label">Máx. productos</label><input type="number" name="max_products" class="form-control" value="500"></div>
+      <div class="col-md-4"><label class="form-label">Orden</label><input type="number" name="sort_order" class="form-control" value="0"></div>
+      <div class="col-12"><label class="form-label">Features (separados por |)</label><textarea name="features" class="form-control" rows="3" placeholder="Feature 1|Feature 2|Feature 3"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button type="submit" class="btn btn-primary">Crear</button></div>
+</form></div></div></div>
+{% endblock %}

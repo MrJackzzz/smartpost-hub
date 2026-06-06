@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }}{% endblock %}
+{% block heading %}{{ client.name }}{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm rounded-3 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Información</h6>
+        <table class="table table-sm">
+          <tr><td>Subdominio</td><td><code>{{ client.subdomain }}</code></td></tr>
+          <tr><td>URL</td><td>{% if client.instance_url %}<a href="{{ client.instance_url }}" target="_blank">{{ client.instance_url }}</a>{% else %}—{% endif %}</td></tr>
+          <tr><td>Plan</td><td>{{ client.plan.name if client.plan else '—' }}</td></tr>
+          <tr><td>Estado</td><td><span class="badge status-{{ client.status }}">{{ client.status }}</span></td></tr>
+          <tr><td>Máx. usuarios</td><td>{{ client.max_users }}</td></tr>
+          <tr><td>Último heartbeat</td><td>{{ client.last_heartbeat.strftime('%d/%m/%Y %H:%M:%S') if client.last_heartbeat else 'Nunca' }}</td></tr>
+          <tr><td>Creado</td><td>{{ client.created_at.strftime('%d/%m/%Y') }}</td></tr>
+        </table>
+        {% if client.notes %}<p class="text-muted small mb-0">{{ client.notes }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm rounded-3 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Últimos 30 días</h6>
+        <table class="table table-sm">
+          <thead><tr><th>Fecha</th><th>Ventas</th><th>Ingresos</th><th>Usuarios</th></tr></thead>
+          <tbody>
+            {% for s in stats %}
+            <tr>
+              <td>{{ s.date.strftime('%d/%m') }}</td>
+              <td>{{ s.total_sales }}</td>
+              <td>${{ "%.2f"|format(s.total_revenue) }}</td>
+              <td>{{ s.active_users }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-3">Sin datos aún</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+  <div class="card-body">
+    <h6 class="fw-bold mb-3">Editar cliente</h6>
+    <form method="post" action="{{ url_for('client_edit', id=client.id) }}" class="row g-3">
+      <div class="col-md-4"><label class="form-label">Nombre</label><input type="text" name="name" class="form-control" value="{{ client.name }}"></div>
+      <div class="col-md-4"><label class="form-label">Subdominio</label><input type="text" name="subdomain" class="form-control" value="{{ client.subdomain }}"></div>
+      <div class="col-md-4"><label class="form-label">URL instancia</label><input type="text" name="instance_url" class="form-control" value="{{ client.instance_url or '' }}"></div>
+      <div class="col-md-3"><label class="form-label">Estado</label><select name="status" class="form-select">
+        <option value="active" {{ 'selected' if client.status == 'active' }}>Active</option>
+        <option value="suspended" {{ 'selected' if client.status == 'suspended' }}>Suspended</option>
+        <option value="trial" {{ 'selected' if client.status == 'trial' }}>Trial</option>
+      </select></div>
+      <div class="col-md-3"><label class="form-label">Plan</label><select name="plan_id" class="form-select">
+        <option value="">Sin plan</option>
+        {% for p in plans %}
+        <option value="{{ p.id }}" {{ 'selected' if client.plan_id == p.id }}>{{ p.name }}</option>
+        {% endfor %}
+      </select></div>
+      <div class="col-md-3"><label class="form-label">Máx. usuarios</label><input type="number" name="max_users" class="form-control" value="{{ client.max_users }}"></div>
+      <div class="col-md-12"><label class="form-label">Notas</label><textarea name="notes" class="form-control" rows="2">{{ client.notes or '' }}</textarea></div>
+      <div class="col-12"><button type="submit" class="btn btn-primary">Guardar cambios</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

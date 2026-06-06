@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="icon" style="background:#e0fbfc;color:#3d5a80;"><i class="bi bi-people"></i></div>
+      <div>
+        <div class="number">{{ total_clients }}</div>
+        <div class="label">Total Clientes</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="icon" style="background:#d4edda;color:#28a745;"><i class="bi bi-check-circle"></i></div>
+      <div>
+        <div class="number">{{ active_clients }}</div>
+        <div class="label">Activos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="icon" style="background:#fff3cd;color:#856404;"><i class="bi bi-cart"></i></div>
+      <div>
+        <div class="number">{{ total_sales }}</div>
+        <div class="label">Ventas totales</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="icon" style="background:#f8d7da;color:#dc3545;"><i class="bi bi-currency-dollar"></i></div>
+      <div>
+        <div class="number">${{ "%.0f"|format(total_revenue) }}</div>
+        <div class="label">Ingresos totales</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-header bg-white fw-bold">Ventas por mes</div>
+      <div class="card-body">
+        <canvas id="chartSales" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-header bg-white fw-bold">Últimos clientes</div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Cliente</th><th>Estado</th></tr></thead>
+          <tbody>
+            {% for c in recent_clients %}
+            <tr>
+              <td><a href="{{ url_for('client_detail', id=c.id) }}">{{ c.name }}</a></td>
+              <td><span class="badge bg-{{ 'success' if c.status == 'active' else 'secondary' }}">{{ c.status }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const months = {{ stats_by_month|map(attribute='month')|list|tojson|safe }};
+const revenues = {{ stats_by_month|map(attribute='revenue')|list|tojson|safe }};
+new Chart(document.getElementById('chartSales'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [{
+      label: 'Ingresos ($)',
+      data: revenues,
+      backgroundColor: '#3d5a80',
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+</script>
+{% endblock %}

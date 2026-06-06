@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Sistemas{% endblock %}
+{% block heading %}Sistemas{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newSystemModal"><i class="bi bi-plus-lg"></i> Nuevo sistema</button>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Demo</th><th>Activo</th><th>Orden</th><th></th></tr></thead>
+      <tbody>
+        {% for s in systems %}
+        <tr>
+          <td><a href="#" onclick="editSystem({{ s.id }})">{{ s.name }}</a></td>
+          <td><span class="badge badge-category">{{ s.category or '—' }}</span></td>
+          <td>{{ s.price or '—' }}</td>
+          <td>{% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>{% else %}—{% endif %}</td>
+          <td>{% if s.is_active %}<span class="badge bg-success">Sí</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+          <td>{{ s.sort_order }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary" onclick="editSystem({{ s.id }})"><i class="bi bi-pencil"></i></button>
+            <form method="post" action="{{ url_for('system_delete', id=s.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar sistema?')">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- New System Modal -->
+<div class="modal fade" id="newSystemModal"><div class="modal-dialog modal-lg"><div class="modal-content"><form method="post" action="{{ url_for('system_new') }}">
+  <div class="modal-header"><h5 class="modal-title">Nuevo sistema</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" name="name" class="form-control" required></div>
+      <div class="col-md-6"><label class="form-label">Tagline</label><input type="text" name="tagline" class="form-control"></div>
+      <div class="col-12"><label class="form-label">Descripción</label><textarea name="description" class="form-control" rows="2"></textarea></div>
+      <div class="col-md-6"><label class="form-label">URL logo</label><input type="text" name="logo_url" class="form-control"></div>
+      <div class="col-md-3"><label class="form-label">Categoría</label><input type="text" name="category" class="form-control"></div>
+      <div class="col-md-3"><label class="form-label">Precio</label><input type="text" name="price" class="form-control" placeholder="Desde $10/mes"></div>
+      <div class="col-md-6"><label class="form-label">Demo URL</label><input type="text" name="demo_url" class="form-control"></div>
+      <div class="col-md-3"><label class="form-label">Orden</label><input type="number" name="sort_order" class="form-control" value="0"></div>
+      <div class="col-md-3"><label class="form-label">Activo</label><select name="is_active" class="form-select"><option value="1">Sí</option><option value="0">No</option></select></div>
+      <div class="col-12"><label class="form-label">Features (separados por |)</label><textarea name="features" class="form-control" rows="2" placeholder="Feature 1|Feature 2"></textarea></div>
+      <div class="col-12"><label class="form-label">Videos (JSON)</label><textarea name="videos" class="form-control" rows="2" placeholder='[{"title":"Demo","url":"https://youtube.com/embed/..."}]'></textarea></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button type="submit" class="btn btn-primary">Crear</button></div>
+</form></div></div></div>
+{% endblock %}
