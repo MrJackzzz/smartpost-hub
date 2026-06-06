@@ -2,6 +2,7 @@ services:
   - type: web
     name: smartpost-hub
     runtime: python
+    region: oregon
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
     envVars:
@@ -14,5 +15,6 @@ services:
 
 databases:
   - name: smartpost-hub-db
-    databaseName: hub
+    region: oregon
     plan: free
+    databaseName: hub
